@@ -1,0 +1,80 @@
+{
+  "framework": "vite",
+  "buildCommand": "npx vite build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/login.js": {
+      "maxDuration": 10
+    },
+    "api/skus.js": {
+      "maxDuration": 15
+    },
+    "api/clients.js": {
+      "maxDuration": 15
+    },
+    "api/invoices.js": {
+      "maxDuration": 20
+    },
+    "api/settings.js": {
+      "maxDuration": 10
+    },
+    "api/suppliers.js": {
+      "maxDuration": 10
+    },
+    "api/supplier.js": {
+      "maxDuration": 15
+    },
+    "api/orders.js": {
+      "maxDuration": 20
+    },
+    "api/po.js": {
+      "maxDuration": 60
+    },
+    "api/tenants.js": {
+      "maxDuration": 60
+    },
+    "api/admin.js": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/po?action=run&all=1",
+      "schedule": "0 0 * * *"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        }
+      ]
+    }
+  ]
+}

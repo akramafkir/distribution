@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --yf-primary: #508BF2;      --yf-primary-rgb: 80 139 242;
+  --yf-green: #4D9D5E;        --yf-green-rgb: 77 157 94;
+  --yf-red: #E13440;          --yf-red-rgb: 225 52 64;
+  --yf-orange: #E67824;       --yf-orange-rgb: 230 120 36;
+  --yf-tint: #FCEAEB;         --yf-tint-rgb: 252 234 235;
+  --yf-neutral-50: #F9FAFC;   --yf-neutral-50-rgb: 249 250 252;
+  --yf-neutral-100: #F4F5F9;  --yf-neutral-100-rgb: 244 245 249;
+  --yf-neutral-200: #ECECEC;  --yf-neutral-200-rgb: 236 236 236;
+  --yf-neutral-300: #D2D5DB;  --yf-neutral-300-rgb: 210 213 219;
+  --yf-neutral-400: #9E9E9E;  --yf-neutral-400-rgb: 158 158 158;
+  --yf-neutral-500: #777777;  --yf-neutral-500-rgb: 119 119 119;
+  --yf-neutral-600: #636F81;  --yf-neutral-600-rgb: 99 111 129;
+  --yf-neutral-700: #4B596E;  --yf-neutral-700-rgb: 75 89 110;
+  --yf-neutral-800: #3A4960;  --yf-neutral-800-rgb: 58 73 96;
+  --yf-neutral-900: #3A4960;  --yf-neutral-900-rgb: 58 73 96;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-viewport-fit: cover;
+    viewport-fit: cover;
+  }
+  body {
+    @apply bg-neutral-50 text-neutral-900 antialiased;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans',
+      'Noto Naskh Arabic', sans-serif;
+  }
+
+  /* Safe area support for notches and home indicators */
+  .safe-area-pb {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-touch items-center justify-center gap-2 rounded-xl
+      px-4 text-[15px] font-semibold transition active:scale-[0.98]
+      disabled:opacity-50;
+  }
+  .btn-primary   { @apply btn bg-yf-primary text-white; }
+  .btn-secondary { @apply btn border border-yf-primary/30 bg-white text-yf-primary; }
+  .btn-danger    { @apply btn bg-yf-red text-white; }
+  .btn-ghost     { @apply btn text-yf-primary; }
+
+  .input {
+    @apply w-full min-h-touch rounded-xl border border-neutral-200 bg-neutral-100
+      px-3 text-[16px] outline-none focus:border-yf-primary focus:ring-2
+      focus:ring-yf-primary/20;
+  }
+  .label { @apply mb-1 block text-[13px] font-medium text-neutral-600; }
+  .card  { @apply rounded-2xl border border-neutral-200 bg-white p-4; }
+
+  .chip         { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .chip-green   { @apply chip bg-yf-green/15 text-yf-green; }
+  .chip-red     { @apply chip bg-yf-red/15 text-yf-red; }
+  .chip-orange  { @apply chip bg-yf-orange/15 text-yf-orange; }
+  .chip-gray    { @apply chip bg-neutral-200 text-neutral-600; }
+  .chip-primary { @apply chip bg-yf-primary/10 text-yf-primary; }
+}
+
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  nav, .no-print { display: none !important; }
+  .print-area { display: block !important; }
+  .invoice-sheet { page-break-after: always; box-shadow: none !important; margin: 0 !important; }
+  .invoice-sheet:last-child { page-break-after: auto; }
+  @page { size: A4; margin: 12mm; }
+}

@@ -1,0 +1,1 @@
+{"extractedAt": "2026-07-11T00:54:33.888652Z", "skuCount": 1194, "clientCount": 9809, "source": "consolidatedDB-prod", "filters": {"skus": "companyCode=20000", "clients": "country=MA & not deleted"}}
