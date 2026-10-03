@@ -1639,41 +1639,90 @@ function Commandes() {
   const [data, setData] = useState(null);
   const [detail, setDetail] = useState(null);
   const [newOrder, setNewOrder] = useState(false);
+  const [newClient, setNewClient] = useState(false);
   const load = useCallback(() => { api('/orders?limit=50').then(setData).catch(() => setData({ rows: [] })); }, []);
   useEffect(() => { load(); }, [load]);
 
   if (detail) return <OrderDetail orderId={detail} onBack={() => { setDetail(null); load(); }} />;
+
+  // Get greeting based on time of day
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Bon matin' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+  const userName = getUser();
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-yf-primary">Commandes</h1>
-        <button onClick={() => setNewOrder(true)} className="btn-primary">+ Nouvelle commande</button>
+      {/* Greeting */}
+      <div>
+        <h1 className="text-2xl font-bold text-neutral-900">Salut {userName}</h1>
+        <p className="text-sm text-neutral-500">{greeting}</p>
       </div>
-      <p className="text-sm text-neutral-500">
-        La commande part sans prix. <b>PO Calculation</b> les regroupe, l'équipe achat saisit ce qu'elle a payé
-        au marché, puis ici on pose le prix client (coût + marge) et on facture — un client à la fois.
-      </p>
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-        {!data ? <Loading /> : !data.rows.length ? <Empty msg="Aucune commande. Crée la première." /> : (
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-neutral-50 text-neutral-500 text-xs uppercase"><tr><th className="text-left px-3 py-2">N°</th><th className="text-left px-3 py-2">Client</th><th className="text-left px-3 py-2">Statut</th><th className="text-right px-3 py-2">Lignes</th><th className="w-16"></th></tr></thead>
-            <tbody className="divide-y divide-neutral-100">
-              {data.rows.map(o => (
-                <tr key={o.orderId} className="hover:bg-neutral-50">
-                  <td className="px-3 py-2 font-mono text-yf-primary">{o.orderId}</td>
-                  <td className="px-3 py-2 text-neutral-700">{o.client?.name}</td>
-                  <td className="px-3 py-2"><span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_BADGE[o.status]}`}>{STATUS_LABEL[o.status]}</span></td>
-                  <td className="px-3 py-2 text-right text-neutral-500">{o.lineCount}</td>
-                  <td className="px-3 py-2 text-right"><button onClick={() => setDetail(o.orderId)} className="text-xs text-yf-primary hover:underline">Ouvrir</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+      {/* Hero Cards */}
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={() => go('/clients')} className="bg-gradient-to-br from-yf-primary to-blue-600 rounded-2xl p-4 text-white shadow-md hover:shadow-lg transition">
+          <div className="flex items-start justify-between">
+            <div className="text-left">
+              <div className="text-lg font-bold">MES CLIENTS</div>
+              <div className="text-xs opacity-90">GESTION DES CLIENTS</div>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center text-xl">👥</div>
           </div>
-        )}
+        </button>
+        <button onClick={() => go('/reglages')} className="bg-gradient-to-br from-yf-primary to-blue-600 rounded-2xl p-4 text-white shadow-md hover:shadow-lg transition">
+          <div className="flex items-start justify-between">
+            <div className="text-left">
+              <div className="text-lg font-bold">MON PROFIL</div>
+              <div className="text-xs opacity-90">GESTION DU PROFIL</div>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center text-xl">👤</div>
+          </div>
+        </button>
       </div>
+
+      {/* Quick Action Tiles */}
+      <div className="grid grid-cols-3 gap-2">
+        <button onClick={() => setNewClient(true)} className="flex flex-col items-center gap-1 p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition">
+          <div className="text-2xl">➕</div>
+          <div className="text-xs font-medium text-neutral-600 text-center">Ajouter un client</div>
+        </button>
+        <button onClick={() => go('/factures')} className="flex flex-col items-center gap-1 p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition">
+          <div className="text-2xl">📄</div>
+          <div className="text-xs font-medium text-neutral-600 text-center">Facturation</div>
+        </button>
+        <button onClick={() => go('/po')} className="flex flex-col items-center gap-1 p-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition">
+          <div className="text-2xl">🛒</div>
+          <div className="text-xs font-medium text-neutral-600 text-center">Achats</div>
+        </button>
+      </div>
+
+      {/* Orders Section */}
+      <div className="pt-4 border-t border-neutral-200">
+        <h2 className="text-lg font-bold text-neutral-900 mb-3">Commandes récentes</h2>
+        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+          {!data ? <Loading /> : !data.rows.length ? <Empty msg="Aucune commande. Crée la première." /> : (
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-neutral-50 text-neutral-500 text-xs uppercase"><tr><th className="text-left px-3 py-2">N°</th><th className="text-left px-3 py-2">Client</th><th className="text-left px-3 py-2">Statut</th><th className="text-right px-3 py-2">Lignes</th><th className="w-16"></th></tr></thead>
+              <tbody className="divide-y divide-neutral-100">
+                {data.rows.map(o => (
+                  <tr key={o.orderId} className="hover:bg-neutral-50">
+                    <td className="px-3 py-2 font-mono text-yf-primary">{o.orderId}</td>
+                    <td className="px-3 py-2 text-neutral-700">{o.client?.name}</td>
+                    <td className="px-3 py-2"><span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_BADGE[o.status]}`}>{STATUS_LABEL[o.status]}</span></td>
+                    <td className="px-3 py-2 text-right text-neutral-500">{o.lineCount}</td>
+                    <td className="px-3 py-2 text-right"><button onClick={() => setDetail(o.orderId)} className="text-xs text-yf-primary hover:underline">Ouvrir</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
+          )}
+        </div>
+      </div>
+
       {newOrder && <NewOrder onSaved={id => { setNewOrder(false); load(); setDetail(id); }} onClose={() => setNewOrder(false)} />}
+      {newClient && <NewClient onCreated={() => { setNewClient(false); }} onClose={() => setNewClient(false)} />}
     </div>
   );
 }
