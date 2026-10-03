@@ -196,7 +196,16 @@ const Empty = ({ msg }) => <div className="text-sm text-neutral-400 py-8 text-ce
 
 // ───────────────────────── VENTE (order builder) ─────────────────────────
 function Vente() {
-  const [client, setClient] = useState(null);
+  const [client, setClient] = useState(() => {
+    try {
+      const pre = sessionStorage.getItem('_preselectedClient');
+      if (pre) {
+        sessionStorage.removeItem('_preselectedClient');
+        return JSON.parse(pre);
+      }
+    } catch {}
+    return null;
+  });
   const [lines, setLines] = useState([]); // {itemId,name,uom,qty,unitPrice}
   const [pickClient, setPickClient] = useState(false);
   const [payment, setPayment] = useState('espece');
@@ -940,9 +949,21 @@ function ClientCard({ client: c, onEdit, onClose }) {
   const mapsUrl = c.geo
     ? `https://www.google.com/maps/dir/?api=1&destination=${c.geo.lat},${c.geo.lng}&travelmode=driving`
     : null;
+
+  function startOrder() {
+    sessionStorage.setItem('_preselectedClient', JSON.stringify(c));
+    go('/vente');
+    onClose();
+  }
+
   return (
     <Modal title={c.name} onClose={onClose}>
       <div className="space-y-3">
+        <button onClick={startOrder}
+          className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg bg-yf-primary hover:bg-blue-600 text-white font-semibold text-sm">
+          🛒 Prise de commande
+        </button>
+
         {mapsUrl ? (
           <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg bg-yf-primary hover:bg-yf-primary text-white font-semibold text-sm">
