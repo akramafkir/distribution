@@ -374,6 +374,7 @@ function ItemSearch({ onAdd }) {
   const [q, setQ] = useState('');
   const [rows, setRows] = useState([]);
   const [open, setOpen] = useState(false);
+  const [newSku, setNewSku] = useState(false);
   const t = useRef(null);
   useEffect(() => {
     if (!q.trim()) { setRows([]); return; }
@@ -383,10 +384,18 @@ function ItemSearch({ onAdd }) {
     }, 220);
     return () => clearTimeout(t.current);
   }, [q]);
+
+  if (newSku) {
+    return <NewSku onCreated={(sku) => { onAdd(sku); setNewSku(false); setQ(''); }} onClose={() => setNewSku(false)} />;
+  }
+
   return (
     <div className="relative">
-      <input value={q} onChange={e => setQ(e.target.value)} onFocus={() => rows.length && setOpen(true)}
-        className="input" placeholder="🔍 Chercher un produit à ajouter…" />
+      <div className="flex gap-2">
+        <input value={q} onChange={e => setQ(e.target.value)} onFocus={() => rows.length && setOpen(true)}
+          className="input flex-1" placeholder="🔍 Chercher un produit à ajouter…" />
+        <button onClick={() => setNewSku(true)} className="btn-primary">+ Produit</button>
+      </div>
       {open && rows.length > 0 && (
         <div className="absolute z-10 mt-1 w-full bg-white border border-neutral-200 rounded-lg shadow-lg max-h-72 overflow-y-auto">
           {rows.map(s => (
@@ -402,6 +411,55 @@ function ItemSearch({ onAdd }) {
         </div>
       )}
     </div>
+  );
+}
+
+/** Create a new SKU on the fly */
+function NewSku({ onCreated, onClose }) {
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+  const [uom, setUom] = useState('KG');
+  const [price, setPrice] = useState('');
+  const [err, setErr] = useState('');
+
+  function create() {
+    if (!name.trim()) { setErr('Nom requis'); return; }
+    onCreated({ itemId: `NEW-${Date.now()}`, name, category, uom, price: Number(price) || 0 });
+  }
+
+  return (
+    <Modal title="Ajouter un produit" onClose={onClose}>
+      <div className="space-y-3">
+        {err && <div className="bg-red-50 border border-red-200 rounded p-2 text-xs text-red-700">{err}</div>}
+        <div>
+          <label className="text-xs text-neutral-500">Nom du produit *</label>
+          <input value={name} onChange={e => setName(e.target.value)} className="input mt-1" placeholder="Ex: Tomate cerise" />
+        </div>
+        <div>
+          <label className="text-xs text-neutral-500">Catégorie</label>
+          <input value={category} onChange={e => setCategory(e.target.value)} className="input mt-1" placeholder="Ex: Légumes" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-neutral-500">Unité</label>
+            <select value={uom} onChange={e => setUom(e.target.value)} className="input mt-1">
+              <option>KG</option>
+              <option>L</option>
+              <option>U</option>
+              <option>CRATE</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-neutral-500">Prix (DH)</label>
+            <input type="number" min="0" step="any" value={price} onChange={e => setPrice(e.target.value)} className="input mt-1" placeholder="0" />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={create} className="btn-primary flex-1">Ajouter</button>
+          <button onClick={onClose} className="btn-ghost flex-1">Annuler</button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
@@ -945,7 +1003,53 @@ function Clients() {
 
 /** Fiche client — pensée pour le livreur : tout ce qu'il faut pour trouver le
  *  magasin et appeler, avec l'itinéraire qui s'ouvre dans l'app Maps du téléphone. */
+/** Detailed client order view (like Salim DMS) */
+function OrderClientDetail({ client: c, onStartOrder }) {
+  const initials = c.name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
+  return (
+    <div className="space-y-4">
+      {/* Client Avatar & Info */}
+      <div className="text-center">
+        <div className="w-20 h-20 mx-auto rounded-full bg-yf-primary text-white flex items-center justify-center text-2xl font-bold mb-2">
+          {initials}
+        </div>
+        <h2 className="text-xl font-bold text-neutral-900">{c.name}</h2>
+        <p className="text-sm text-neutral-600">{c.ice || ''}</p>
+        {c.city && <p className="text-sm text-neutral-600">{c.city}</p>}
+        {c.address && <p className="text-xs text-neutral-500">{c.address}</p>}
+      </div>
+
+      {/* Credit & Balance Info */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-neutral-50 rounded-lg p-3 text-center">
+          <div className="text-xs text-neutral-500 mb-1">Crédit disponible</div>
+          <div className="text-lg font-bold text-neutral-800">—</div>
+        </div>
+        <div className="bg-neutral-50 rounded-lg p-3 text-center">
+          <div className="text-xs text-neutral-500 mb-1">Encours</div>
+          <div className="text-lg font-bold text-yf-red">MAD 0,00</div>
+        </div>
+      </div>
+
+      {/* Today's Actions */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-bold text-neutral-500 uppercase">Aujourd'hui</h3>
+        <button onClick={onStartOrder}
+          className="w-full p-3 bg-white border border-neutral-200 rounded-lg hover:border-yf-primary hover:bg-yf-primary/5 text-left">
+          <div className="font-medium text-yf-primary">Nouvelle commande</div>
+          <div className="text-xs text-neutral-500">Prendre une commande pour ce client</div>
+        </button>
+        <button className="w-full p-3 bg-white border border-neutral-200 rounded-lg hover:border-yf-primary hover:bg-yf-primary/5 text-left">
+          <div className="font-medium text-neutral-800">Encaisser un paiement</div>
+          <div className="text-xs text-neutral-500">Enregistrer un paiement</div>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ClientCard({ client: c, onEdit, onClose }) {
+  const [orderView, setOrderView] = useState(false);
   // L'URL universelle Google Maps : sur téléphone elle ouvre l'application
   // Maps directement en mode itinéraire ; sur ordinateur, le site.
   const mapsUrl = c.geo
@@ -958,10 +1062,19 @@ function ClientCard({ client: c, onEdit, onClose }) {
     onClose();
   }
 
+  if (orderView) {
+    return (
+      <Modal title="" onClose={() => setOrderView(false)}>
+        <button onClick={() => setOrderView(false)} className="mb-3 text-neutral-500 hover:text-neutral-700 text-sm">← Retour</button>
+        <OrderClientDetail client={c} onStartOrder={startOrder} />
+      </Modal>
+    );
+  }
+
   return (
     <Modal title={c.name} onClose={onClose}>
       <div className="space-y-3">
-        <button onClick={startOrder}
+        <button onClick={() => setOrderView(true)}
           className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg bg-yf-primary hover:bg-blue-600 text-white font-semibold text-sm">
           🛒 Prise de commande
         </button>
