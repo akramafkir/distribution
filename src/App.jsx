@@ -56,9 +56,10 @@ export default function App() {
   const [authed, setAuthed] = useState(!!getToken());
   const route = useRoute();
   const [activeTab, setActiveTab] = useState(() => {
-    const routes = ['commandes', 'clients', 'factures', 'po', 'produits'];
     const top = route.split('/')[0];
-    if (routes.includes(top)) return top;
+    if (top === 'plus') return 'more';
+    if (top === 'clients') return 'clients';
+    if (top === 'commandes') return 'orders';
     return 'home';
   });
 
@@ -79,6 +80,7 @@ export default function App() {
   else if (top === 'factures') page = <Factures />;
   else if (top === 'reglages') page = <Reglages />;
   else if (top === 'facture') page = <InvoiceView numero={seg[1]} />;
+  else if (top === 'plus') page = <PlusMenu />;
   else page = <Commandes />;
 
   const tenant = getTenant();
@@ -1288,6 +1290,50 @@ function InvoiceSheet({ invoice: inv, settings: s = {} }) {
 }
 const TR = ({ k, v }) => <div className="flex justify-between py-0.5 text-neutral-600"><span>{k}</span><span>{v}</span></div>;
 function labelPay(m) { return ({ espece: 'Espèces', cheque: 'Chèque', virement: 'Virement', credit: 'Crédit', cod: 'Espèces', cash: 'Espèces' }[m] || m); }
+
+// ───────────────────────── PLUS MENU ─────────────────────────
+function PlusMenu() {
+  const user = getUser();
+  return (
+    <div className="space-y-3">
+      <h1 className="text-2xl font-bold text-yf-primary">Plus</h1>
+
+      <div className="grid gap-2">
+        <button onClick={() => go('/po')} className="flex items-center gap-3 p-4 bg-white rounded-lg border border-neutral-200 hover:border-yf-primary transition text-left">
+          <span className="text-xl">📦</span>
+          <div>
+            <div className="font-medium text-neutral-800">Bon d'achat</div>
+            <div className="text-xs text-neutral-500">Gérer les achats fournisseurs</div>
+          </div>
+        </button>
+
+        <button onClick={() => go('/produits')} className="flex items-center gap-3 p-4 bg-white rounded-lg border border-neutral-200 hover:border-yf-primary transition text-left">
+          <span className="text-xl">📚</span>
+          <div>
+            <div className="font-medium text-neutral-800">Produits</div>
+            <div className="text-xs text-neutral-500">Catalogue et tarification</div>
+          </div>
+        </button>
+
+        {isOwner() && (
+          <button onClick={() => go('/reglages')} className="flex items-center gap-3 p-4 bg-white rounded-lg border border-neutral-200 hover:border-yf-primary transition text-left">
+            <span className="text-xl">⚙️</span>
+            <div>
+              <div className="font-medium text-neutral-800">Réglages</div>
+              <div className="text-xs text-neutral-500">Paramètres de l'application</div>
+            </div>
+          </button>
+        )}
+      </div>
+
+      <div className="bg-neutral-50 rounded-lg p-4 space-y-2 text-sm">
+        <div className="text-xs text-neutral-500">Utilisateur connecté</div>
+        <div className="font-medium text-neutral-800">{user || '—'}</div>
+        <button onClick={logout} className="text-yf-red hover:underline text-sm font-medium mt-3">Déconnexion</button>
+      </div>
+    </div>
+  );
+}
 
 // ───────────────────────── RÉGLAGES ─────────────────────────
 function Reglages() {
