@@ -1437,6 +1437,14 @@ function PlusMenu() {
             </div>
           </button>
         )}
+
+        <button onClick={() => window.location.reload(true)} className="flex items-center gap-3 p-4 bg-white rounded-lg border border-neutral-200 hover:border-amber-500 transition text-left">
+          <span className="text-xl">🔄</span>
+          <div>
+            <div className="font-medium text-neutral-800">Rafraîchir</div>
+            <div className="text-xs text-neutral-500">Recharger l'application complètement</div>
+          </div>
+        </button>
       </div>
 
       <div className="bg-neutral-50 rounded-lg p-4 space-y-2 text-sm">

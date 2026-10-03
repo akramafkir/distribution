@@ -22,6 +22,15 @@ export function Pwa() {
     };
   }, []);
 
+  function doUpdate() {
+    if (window.__pwaUpdate) {
+      window.__pwaUpdate();
+    } else {
+      // Fallback: hard refresh if PWA update isn't available
+      window.location.reload(true);
+    }
+  }
+
   if (!needRefresh && !offline) return null;
 
   return (
@@ -37,24 +46,29 @@ export function Pwa() {
         </div>
       )}
       {needRefresh && (
-        <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-xl border border-brand-200 bg-white px-3 py-2 shadow-lg">
-          <span className="flex-1 text-xs text-slate-700">
-            <b className="text-brand-800">Nouvelle version disponible.</b> Termine ta saisie,
-            puis mets à jour.
-          </span>
-          <button
-            onClick={() => window.__pwaUpdate?.()}
-            className="shrink-0 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"
-          >
-            Mettre à jour
-          </button>
-          <button
-            onClick={() => setNeedRefresh(false)}
-            aria-label="Plus tard"
-            className="shrink-0 rounded-lg px-2 py-1.5 text-xs text-slate-400 hover:text-slate-600"
-          >
-            ✕
-          </button>
+        <div className="pointer-events-auto w-full max-w-md rounded-xl border border-yf-primary/20 bg-blue-50 px-4 py-3 shadow-lg">
+          <div className="flex items-start gap-3">
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-yf-primary">✨ Nouvelle version disponible</div>
+              <p className="text-xs text-neutral-600 mt-1">
+                Une mise à jour est prête. Clique sur "Mettre à jour" pour charger les nouvelles fonctionnalités.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={doUpdate}
+              className="flex-1 rounded-lg bg-yf-primary px-3 py-2 text-xs font-semibold text-white hover:bg-blue-600 transition"
+            >
+              ⚡ Mettre à jour maintenant
+            </button>
+            <button
+              onClick={() => setNeedRefresh(false)}
+              className="px-3 py-2 text-xs text-neutral-500 hover:text-neutral-700"
+            >
+              Plus tard
+            </button>
+          </div>
         </div>
       )}
     </div>
